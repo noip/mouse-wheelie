@@ -40,4 +40,66 @@ public class ActionModifierKeybinding extends MWBaseKeyMapping implements AmecsP
 		setDown(false);
 		return false;
 	}
+
+	@Override
+	public boolean isDown() {
+		if (super.isDown()) {
+			return true;
+		}
+		if (isUnbound()) {
+			return false;
+		}
+		//# if MC_VERSION_NUMBER >= 260300
+		if (key.getType() == InputConstants.Type.KEYBOARD) {
+			int code = key.getValue();
+			if (InputConstants.isKeyDown(code)) {
+				return true;
+			}
+			if (code == InputConstants.KEY_LALT && InputConstants.isKeyDown(InputConstants.KEY_RALT)) {
+				return true;
+			}
+			if (code == InputConstants.KEY_LSHIFT && InputConstants.isKeyDown(InputConstants.KEY_RSHIFT)) {
+				return true;
+			}
+			if (code == InputConstants.KEY_LCONTROL && InputConstants.isKeyDown(InputConstants.KEY_RCONTROL)) {
+				return true;
+			}
+		}
+		//# elif MC_VERSION_NUMBER >= 12109
+		//- if (key.getType() == InputConstants.Type.KEYSYM) {
+		//- 	long window = net.minecraft.client.Minecraft.getInstance().getWindow().handle();
+		//- 	int code = key.getValue();
+		//- 	if (InputConstants.isKeyDown(window, code)) {
+		//- 		return true;
+		//- 	}
+		//- 	if (code == org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT && InputConstants.isKeyDown(window, org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_ALT)) {
+		//- 		return true;
+		//- 	}
+		//- 	if (code == org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT && InputConstants.isKeyDown(window, org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_SHIFT)) {
+		//- 		return true;
+		//- 	}
+		//- 	if (code == org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_CONTROL && InputConstants.isKeyDown(window, org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_CONTROL)) {
+		//- 		return true;
+		//- 	}
+		//- }
+		//# else
+		//- if (key.getType() == InputConstants.Type.KEYSYM) {
+		//- 	long window = net.minecraft.client.Minecraft.getInstance().getWindow().getWindow();
+		//- 	int code = key.getValue();
+		//- 	if (InputConstants.isKeyDown(window, code)) {
+		//- 		return true;
+		//- 	}
+		//- 	if (code == org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT && InputConstants.isKeyDown(window, org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_ALT)) {
+		//- 		return true;
+		//- 	}
+		//- 	if (code == org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT && InputConstants.isKeyDown(window, org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_SHIFT)) {
+		//- 		return true;
+		//- 	}
+		//- 	if (code == org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_CONTROL && InputConstants.isKeyDown(window, org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_CONTROL)) {
+		//- 		return true;
+		//- 	}
+		//- }
+		//# end
+		return false;
+	}
 }

@@ -110,27 +110,47 @@ public class MWClient implements ClientModInitializer {
 	);
 	public static final ActionModifierKeybinding WHOLE_STACK_MODIFIER = new ActionModifierKeybinding(
 			"whole_stack_modifier",
-			InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_LSHIFT),
+			//# if MC_VERSION_NUMBER >= 260300
+			InputConstants.Type.KEYBOARD.getOrCreate(InputConstants.KEY_LSHIFT),
+			//# else
+			//- InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_LSHIFT),
+			//# end
 			KEY_BINDING_CATEGORY
 	);
 	public static final ActionModifierKeybinding ALL_OF_KIND_MODIFIER = new ActionModifierKeybinding(
 			"all_of_kind_modifier",
-			InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_LCONTROL),
+			//# if MC_VERSION_NUMBER >= 260300
+			InputConstants.Type.KEYBOARD.getOrCreate(InputConstants.KEY_LCONTROL),
+			//# else
+			//- InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_LCONTROL),
+			//# end
 			KEY_BINDING_CATEGORY
 	);
 	public static final ActionModifierKeybinding DROP_MODIFIER = new ActionModifierKeybinding(
 			"drop_modifier",
-			InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_LALT),
+			//# if MC_VERSION_NUMBER >= 260300
+			InputConstants.Type.KEYBOARD.getOrCreate(InputConstants.KEY_LALT),
+			//# else
+			//- InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_LALT),
+			//# end
 			KEY_BINDING_CATEGORY
 	);
 	public static final ActionModifierKeybinding DEPOSIT_MODIFIER = new ActionModifierKeybinding(
 			"deposit_modifier",
-			InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_SPACE),
+			//# if MC_VERSION_NUMBER >= 260300
+			InputConstants.Type.KEYBOARD.getOrCreate(InputConstants.KEY_SPACE),
+			//# else
+			//- InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_SPACE),
+			//# end
 			KEY_BINDING_CATEGORY
 	);
 	public static final ActionModifierKeybinding RESTOCK_MODIFIER = new ActionModifierKeybinding(
 			"restock_modifier",
-			InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_SPACE),
+			//# if MC_VERSION_NUMBER >= 260300
+			InputConstants.Type.KEYBOARD.getOrCreate(InputConstants.KEY_SPACE),
+			//# else
+			//- InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_SPACE),
+			//# end
 			KEY_BINDING_CATEGORY
 	);
 

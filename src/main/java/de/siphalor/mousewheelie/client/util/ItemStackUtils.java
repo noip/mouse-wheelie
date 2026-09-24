@@ -287,11 +287,21 @@ public class ItemStackUtils {
 			case SOME:
 				HashCodeBuilder hashCodeBuilder = new HashCodeBuilder()
 						.append(stack.getItem());
-				//# if MC_VERSION_NUMBER >= 12006
-				stack.getComponentsPatch().entrySet().stream()
-						.filter(entry -> entry.getKey() != DataComponents.DAMAGE && entry.getKey() != DataComponents.ENCHANTMENTS)
-						.sorted(Comparator.comparing(entry -> entry.getKey().hashCode()))
-						.forEachOrdered(entry -> hashCodeBuilder.append(entry.getKey()).append(entry.getValue()));
+				//# if MC_VERSION_NUMBER >= 260300
+				net.minecraft.core.component.DataComponentPatch.SplitResult split = stack.getComponentsPatch().split();
+				split.added().stream()
+						.filter(component -> component.type() != DataComponents.DAMAGE && component.type() != DataComponents.ENCHANTMENTS)
+						.sorted(Comparator.comparing(component -> component.type().hashCode()))
+						.forEachOrdered(component -> hashCodeBuilder.append(component.type()).append(component.value()));
+				split.removed().stream()
+						.filter(type -> type != DataComponents.DAMAGE && type != DataComponents.ENCHANTMENTS)
+						.sorted(Comparator.comparing(Object::hashCode))
+						.forEachOrdered(hashCodeBuilder::append);
+				//# elif MC_VERSION_NUMBER >= 12006
+				//- stack.getComponentsPatch().entrySet().stream()
+				//- 		.filter(entry -> entry.getKey() != DataComponents.DAMAGE && entry.getKey() != DataComponents.ENCHANTMENTS)
+				//- 		.sorted(Comparator.comparing(entry -> entry.getKey().hashCode()))
+				//- 		.forEachOrdered(entry -> hashCodeBuilder.append(entry.getKey()).append(entry.getValue()));
 				//# else
 				//- CompoundTag nbt = stack.getTag();
 				//- if (nbt == null) {

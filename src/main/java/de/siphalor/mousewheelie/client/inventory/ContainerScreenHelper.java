@@ -157,6 +157,11 @@ public class ContainerScreenHelper<T extends AbstractContainerScreen<?>> {
 	}
 
 	public void scroll(Slot referenceSlot, boolean scrollUp) {
+		if (MouseWheelie.config.general.enableDropModifier && MWClient.DROP_MODIFIER.isDown()) {
+			scrollDrop(referenceSlot);
+			return;
+		}
+
 		// Shall send determines whether items from the referenceSlot shall be moved to another scope. Otherwise the referenceSlot will receive items.
 		boolean shallSend;
 		if (MouseWheelie.config.scrolling.directionalScrolling) {
@@ -506,6 +511,34 @@ public class ContainerScreenHelper<T extends AbstractContainerScreen<?>> {
 
 		slotsByItemKind.asMap().forEach((itemKind, slots) ->
 				restockAllOfAKind(slots.iterator(), complementaryScope)
+		);
+	}
+
+	private void scrollDrop(Slot referenceSlot) {
+		if (MWClient.ALL_OF_KIND_MODIFIER.isDown()) {
+			if (MWClient.WHOLE_STACK_MODIFIER.isDown()) {
+				dropAllFrom(referenceSlot);
+			} else {
+				dropAllOfAKind(referenceSlot);
+			}
+		} else if (MWClient.WHOLE_STACK_MODIFIER.isDown()) {
+			dropStack(referenceSlot);
+		} else {
+			dropSingleItem(referenceSlot);
+		}
+	}
+
+	public void dropSingleItem(Slot slot) {
+		if (getSlotState(slot).areInteractionsLocked()) {
+			return;
+		}
+
+		InteractionManager.push(
+				//# if MC_VERSION_NUMBER >= 260100
+				createClickEvent(slot, 0, ContainerInput.THROW)
+				//# else
+				//- createClickEvent(slot, 0, ClickType.THROW)
+				//# end
 		);
 	}
 

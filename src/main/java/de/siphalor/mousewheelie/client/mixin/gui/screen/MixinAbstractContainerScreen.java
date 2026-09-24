@@ -18,6 +18,7 @@
 package de.siphalor.mousewheelie.client.mixin.gui.screen;
 
 import com.google.common.base.Suppliers;
+import com.mojang.blaze3d.platform.InputConstants;
 import de.siphalor.mousewheelie.MouseWheelie;
 import de.siphalor.mousewheelie.client.MWClient;
 import de.siphalor.mousewheelie.client.inventory.BundleDragMode;
@@ -34,7 +35,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+//# if MC_VERSION_NUMBER < 260300
+//- import org.lwjgl.glfw.GLFW;
+//# end
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -176,20 +179,33 @@ public abstract class MixinAbstractContainerScreen extends Screen implements ICo
 		}
 
 		ContainerScreenHelper<?> screenHelper = this.screenHelper.get();
-		if (button == 0) { // Left mouse button
-			if (MouseWheelie.config.general.enableDropModifier && MWClient.DROP_MODIFIER.isDown()) {
+		//# if MC_VERSION_NUMBER >= 260300
+		if (button == InputConstants.MOUSE_BUTTON_LEFT) {
+		//# else
+		//- if (button == 0) {
+		//# end
+			//# if MC_VERSION_NUMBER >= 12109
+			boolean dropDown = MouseWheelie.config.general.enableDropModifier && (MWClient.DROP_MODIFIER.isDown() || event.hasAltDown());
+			boolean wholeStackDown = MWClient.WHOLE_STACK_MODIFIER.isDown() || event.hasShiftDown();
+			boolean allOfKindDown = MWClient.ALL_OF_KIND_MODIFIER.isDown() || event.hasControlDown();
+			//# else
+			//- boolean dropDown = MouseWheelie.config.general.enableDropModifier && MWClient.DROP_MODIFIER.isDown();
+			//- boolean wholeStackDown = MWClient.WHOLE_STACK_MODIFIER.isDown();
+			//- boolean allOfKindDown = MWClient.ALL_OF_KIND_MODIFIER.isDown();
+			//# end
+			if (dropDown) {
 				for (Slot slot : slots) {
 					if (!slot.getItem().isEmpty()) {
 						screenHelper.dropStackLocked(slot);
 					}
 				}
-			} else if (MWClient.WHOLE_STACK_MODIFIER.isDown()) {
+			} else if (wholeStackDown) {
 				for (Slot slot : slots) {
 					if (!slot.getItem().isEmpty()) {
 						screenHelper.sendStackLocked(slot);
 					}
 				}
-			} else if (MWClient.ALL_OF_KIND_MODIFIER.isDown()) {
+			} else if (allOfKindDown) {
 				for (Slot slot : slots) {
 					if (!slot.getItem().isEmpty()) {
 						screenHelper.sendAllOfAKind(slot);
@@ -200,7 +216,11 @@ public abstract class MixinAbstractContainerScreen extends Screen implements ICo
 
 		ItemStack cursorStack = menu.getCarried();
 		if (!cursorStack.isEmpty() && cursorStack.getItem() instanceof BundleItem item) {
-			if (bundleDragMode == null && button != 0) {
+			//# if MC_VERSION_NUMBER >= 260300
+			if (bundleDragMode == null && button != InputConstants.MOUSE_BUTTON_LEFT) {
+			//# else
+			//- if (bundleDragMode == null && button != 0) {
+			//# end
 				return;
 			}
 			Slot lastSlot = null;
@@ -254,16 +274,30 @@ public abstract class MixinAbstractContainerScreen extends Screen implements ICo
 	//# else
 	//- public void onMouseClick(double x, double y, int button, CallbackInfoReturnable<Boolean> cir) {
 	//# end
-		if (button == 0) {
+		//# if MC_VERSION_NUMBER >= 260300
+		if (button == InputConstants.MOUSE_BUTTON_LEFT) {
+		//# else
+		//- if (button == 0) {
+		//# end
 			Slot hoveredSlot = findSlot(x, y);
 			if (hoveredSlot == null) {
 				return;
 			}
 
+			//# if MC_VERSION_NUMBER >= 12109
+			boolean dropDown = MouseWheelie.config.general.enableDropModifier && (MWClient.DROP_MODIFIER.isDown() || event.hasAltDown());
+			boolean wholeStackDown = MWClient.WHOLE_STACK_MODIFIER.isDown() || event.hasShiftDown();
+			boolean allOfKindDown = MWClient.ALL_OF_KIND_MODIFIER.isDown() || event.hasControlDown();
+			//# else
+			//- boolean dropDown = MouseWheelie.config.general.enableDropModifier && MWClient.DROP_MODIFIER.isDown();
+			//- boolean wholeStackDown = MWClient.WHOLE_STACK_MODIFIER.isDown();
+			//- boolean allOfKindDown = MWClient.ALL_OF_KIND_MODIFIER.isDown();
+			//# end
+
 			boolean success = true;
-			if (MouseWheelie.config.general.enableDropModifier && MWClient.DROP_MODIFIER.isDown()) {
-				if (MWClient.ALL_OF_KIND_MODIFIER.isDown()) {
-					if (MWClient.WHOLE_STACK_MODIFIER.isDown()) {
+			if (dropDown) {
+				if (allOfKindDown) {
+					if (wholeStackDown) {
 						screenHelper.get().dropAllFrom(hoveredSlot);
 					} else {
 						screenHelper.get().dropAllOfAKind(hoveredSlot);
@@ -280,8 +314,8 @@ public abstract class MixinAbstractContainerScreen extends Screen implements ICo
 							//# end
 					);
 				}
-			} else if (MWClient.ALL_OF_KIND_MODIFIER.isDown()) {
-				if (MWClient.WHOLE_STACK_MODIFIER.isDown()) {
+			} else if (allOfKindDown) {
+				if (wholeStackDown) {
 					screenHelper.get().sendAllFrom(hoveredSlot);
 				} else {
 					screenHelper.get().sendAllOfAKind(hoveredSlot);
@@ -289,7 +323,7 @@ public abstract class MixinAbstractContainerScreen extends Screen implements ICo
 			} else if (MWClient.DEPOSIT_MODIFIER.isDown()) {
 				screenHelper.get().depositAllFrom(hoveredSlot);
 			} else if (MWClient.RESTOCK_MODIFIER.isDown()) {
-				if (MWClient.WHOLE_STACK_MODIFIER.isDown()) {
+				if (wholeStackDown) {
 					screenHelper.get().restockAll(hoveredSlot);
 				} else {
 					screenHelper.get().restockAllOfAKind(hoveredSlot);
@@ -307,7 +341,11 @@ public abstract class MixinAbstractContainerScreen extends Screen implements ICo
 			if (success) {
 				cir.setReturnValue(true);
 			}
-		} else if (button == 1) {
+		//# if MC_VERSION_NUMBER >= 260300
+		} else if (button == InputConstants.MOUSE_BUTTON_RIGHT) {
+		//# else
+		//- } else if (button == 1) {
+		//# end
 			ItemStack cursorStack = menu.getCarried();
 			if (!cursorStack.isEmpty() && MouseWheelie.config.general.enableBundleDragging && cursorStack.getItem() instanceof BundleItem item) {
 				Slot hoveredSlot = findSlot(x, y);
@@ -450,8 +488,10 @@ public abstract class MixinAbstractContainerScreen extends Screen implements ICo
 			return false;
 		Player player = Minecraft.getInstance().player;
 		if (player.getAbilities().instabuild
-				//# if MC_VERSION_NUMBER >= 12109
-				&& GLFW.glfwGetMouseButton(minecraft.getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_MIDDLE) != 0
+				//# if MC_VERSION_NUMBER >= 260300
+				&& minecraft.mouseHandler.isMiddlePressed()
+				//# elif MC_VERSION_NUMBER >= 12109
+				//- && GLFW.glfwGetMouseButton(minecraft.getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_MIDDLE) != 0
 				//# else
 				//- && GLFW.glfwGetMouseButton(minecraft.getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_MIDDLE) != 0
 				//# end
